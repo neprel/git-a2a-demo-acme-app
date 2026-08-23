@@ -26,7 +26,7 @@ jobs:
           version: "0.8.15"
           enable-cache: true
       - name: Install git-a2a
-        run: go install github.com/neprel/git-a2a/cmd/git-a2a@main
+        run: go install github.com/neprel/git-a2a/cmd/git-a2a@b10901ab3b2c2d38cb507de49993897c4cb628e9
       - name: Restore the ephemeral manifest cache
         run: git-a2a fetch
       - name: Check dependency health offline

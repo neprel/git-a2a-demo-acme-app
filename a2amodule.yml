@@ -1,7 +1,9 @@
 schema: 1
 module:
   id: consumer-app
+  name: Acme polyglot consumer
   description: Polyglot consumer of the Acme utility demo module.
+  languages: [typescript, python, go]
   exports:
     - ecosystem: npm
       name: consumer-app
@@ -9,6 +11,26 @@ module:
       name: consumer-app
     - ecosystem: golang
       name: github.com/neprel/git-a2a-demo-acme-app
+agents:
+  - name: acme-app-cli
+    role: owner
+    scope: ["**"]
+    description: Owns the Acme consumer applications and their shared dependency integration.
+    contacts:
+      - intents: [question, bug, change, review]
+        kind: github-issue
+        repo: neprel/git-a2a-demo-acme-app
+        labels: [from-agent, change-request]
+policy:
+  intents:
+    question: owner
+    bug: owner
+    change: owner
+    review: owner
+  consumers:
+    may: [read-surface, ask, open-issue, propose-change]
+    may-not: [commit, release]
+  notes: Changes to the consumer are proposed through its declared owner contact.
 dependencies:
   - id: acme-lib-utils
     git: https://github.com/neprel/git-a2a-demo-acme-lib

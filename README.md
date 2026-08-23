@@ -28,9 +28,17 @@ The final command opens a real issue in the library repository with the `change-
 `from-agent` labels. Use it only when you intend to create that public issue. To return to the
 moving demo after experimenting, run `git-a2a set acme-lib-utils --ref main`.
 
+## The consumer is a module too
+
+`consumer-app` has its own display name, language list, owner (`acme-app-cli`), GitHub Issue
+contact, and consumer policy in `a2amodule.yml`. A consumer can therefore be imported and owned
+by another module exactly like the library it consumes. Run `git-a2a who --intent change` to see
+the app's own route, and inspect the “This module” section generated in `AGENTS.md`.
+
 ## Run the proof
 
 ```sh
+git-a2a fetch
 git-a2a status --offline
 git-a2a update --check
 npm ci && npm test

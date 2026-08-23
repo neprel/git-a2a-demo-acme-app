@@ -10,8 +10,10 @@ dependency roster below is generated; use `git-a2a sync` instead of editing its 
 
 Polyglot consumer of the Acme utility demo module.
 
-- may: `read-surface`, `ask`
-- may-not: `commit`
+- `acme-app-cli` (owner), scope: `**`
+- may: `read-surface`, `ask`, `open-issue`, `propose-change`
+- may-not: `commit`, `release`
+- notes: Changes to the consumer are proposed through its declared owner contact.
 
 ### Dependency: `acme-lib-utils`
 

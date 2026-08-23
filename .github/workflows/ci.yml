@@ -13,6 +13,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          submodules: recursive
       - uses: actions/setup-go@40f1582b2485089dde7abd97c1529aa768e1baff # v5.6.0
         with:
           go-version: "1.25"
@@ -26,7 +28,7 @@ jobs:
           version: "0.8.15"
           enable-cache: true
       - name: Install git-a2a
-        run: go install github.com/neprel/git-a2a/cmd/git-a2a@b10901ab3b2c2d38cb507de49993897c4cb628e9
+        run: go install github.com/neprel/git-a2a/cmd/git-a2a@076bfd1a6b94b57e4010055f872326812366a416
       - name: Restore the ephemeral manifest cache
         run: git-a2a fetch
       - name: Check dependency health offline
@@ -40,3 +42,5 @@ jobs:
         run: uv sync && uv run --with pytest pytest -q && uv run python app.py
       - name: Build and test Go package
         run: go test ./... && go run ./cmd/demo
+      - name: Build and test CMake consumer
+        run: cmake -S . -B build && cmake --build build && ./build/cmake/acme_consumer_cpp

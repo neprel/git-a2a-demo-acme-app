@@ -5,7 +5,7 @@ requires-python = ">=3.11"
 [[package]]
 name = "acme-lib-utils"
 version = "1.1.0"
-source = { git = "https://github.com/neprel/git-a2a-demo-acme-lib?rev=dcaf2b1e6ff07567ccab19d037d5e516e9b4774c#dcaf2b1e6ff07567ccab19d037d5e516e9b4774c" }
+source = { directory = "deps/acme-lib-utils" }
 
 [[package]]
 name = "consumer-app"
@@ -16,4 +16,4 @@ dependencies = [
 ]
 
 [package.metadata]
-requires-dist = [{ name = "acme-lib-utils", git = "https://github.com/neprel/git-a2a-demo-acme-lib?rev=dcaf2b1e6ff07567ccab19d037d5e516e9b4774c" }]
+requires-dist = [{ name = "acme-lib-utils", directory = "deps/acme-lib-utils" }]

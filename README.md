@@ -2,14 +2,17 @@
 
 This public repository is a living end-to-end consumer of
 [`neprel/git-a2a-demo-acme-lib`](https://github.com/neprel/git-a2a-demo-acme-lib). One locked
-library commit is wired into npm, uv, and Go; each small app calls the same utility contract.
+library commit is vendored once as a Git submodule and wired into npm, uv, Go, and CMake; each
+small app calls the same utility contract.
 
 ## What to inspect, in order
 
 1. Read `a2amodule.yml` and `a2amodule.lock` to see the declared ref and resolved commit.
-2. Compare that commit in `package.json`, `pyproject.toml`, and `go.mod`.
+2. Compare the local paths in `package.json`, `pyproject.toml`, `go.mod`, and
+   `deps/git-a2a.cmake`; they all resolve through `deps/acme-lib-utils` at that commit.
 3. Read the generated dependency roster in `AGENTS.md`.
-4. Inspect `.github/workflows/ci.yml`, which checks health, updates, and all three implementations.
+4. Inspect `.github/workflows/ci.yml`, which clones submodules recursively, checks health and
+   updates, then builds all four implementations.
 5. Run the lifecycle below from this repository.
 
 ```sh
@@ -38,10 +41,17 @@ the app's own route, and inspect the “This module” section generated in `AGE
 ## Run the proof
 
 ```sh
+git clone --recurse-submodules https://github.com/neprel/git-a2a-demo-acme-app
+cd git-a2a-demo-acme-app
 git-a2a fetch
 git-a2a status --offline
 git-a2a update --check
 npm ci && npm test
 uv sync && uv run --with pytest pytest
 go test ./...
+cmake -S . -B build && cmake --build build && ./build/cmake/acme_consumer_cpp
 ```
+
+The dependency declaration uses `vendor: {mode: submodule}`. `git-a2a fetch` restores both the
+ephemeral cache and the locked submodule materialisation; native package managers use local path
+wiring while CMake consumes the library's exported `acme_lib_utils` target.

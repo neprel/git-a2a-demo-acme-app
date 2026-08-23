@@ -4,5 +4,11 @@ dependencies:
         git: https://github.com/neprel/git-a2a-demo-acme-lib
         ref: main
         path: .
-        commit: dcaf2b1e6ff07567ccab19d037d5e516e9b4774c
-        manifest: sha256:c6015071fb82e2015857ae94920eabf1f2675b296ca9a51c0d2994bb4ebe4583
+        commit: 08e947cd41e78733c848e714f6df92fc09773d22
+        manifest: sha256:48e7aad8f2e537ac648b9475ed70f4d6fffe71c8a233f8edde7352deca961a0f
+        cards:
+            acme-lib-utils: sha256:e154f3cec8004ffc7dbdf4d433450cbc47ad31db19c8a7fc96df1b94216c5f6f
+            acme-pm: sha256:ebdb49ec440600021efb2b8329fff56ca15f47450533c4d709a98e9d339d9d35
+        vendor:
+            mode: submodule
+            path: deps/acme-lib-utils

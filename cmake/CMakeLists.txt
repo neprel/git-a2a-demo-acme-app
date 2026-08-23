@@ -1,0 +1,2 @@
+add_executable(acme_consumer_cpp main.cpp)
+target_link_libraries(acme_consumer_cpp PRIVATE acme_lib_utils)

@@ -37,3 +37,5 @@ dependencies:
     ref: main
     path: .
     track: locked
+    vendor:
+      mode: submodule

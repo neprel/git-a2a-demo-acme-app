@@ -17,11 +17,13 @@ Polyglot consumer of the Acme utility demo module.
 
 ### Dependency: `acme-lib-utils`
 
-> Description (from acme-lib-utils @dcaf2b1e6ff0): Shared formatting utilities with the same contract in TypeScript, Python, and Go.
+> Description (from acme-lib-utils @08e947cd41e7): Shared formatting utilities with the same contract in TypeScript, Python, Go, and C++.
 >
-> Published surface (from acme-lib-utils @dcaf2b1e6ff0): `.git-a2a/cache/acme-lib-utils/surface/` (available after `git-a2a show acme-lib-utils --surface`).
+> Published surface (from acme-lib-utils @08e947cd41e7): `.git-a2a/cache/acme-lib-utils/surface/` (available after `git-a2a show acme-lib-utils --surface`).
 >
-> Consumer policy (from acme-lib-utils @dcaf2b1e6ff0):
+> Vendored at `deps/acme-lib-utils` (submodule). Clone with `--recurse-submodules`; repair an existing clone with `git submodule update --init` or `git-a2a wire`.
+>
+> Consumer policy (from acme-lib-utils @08e947cd41e7):
 > - may: `read-surface`, `ask`, `open-issue`, `propose-change`
 > - may-not: `commit`, `edit-spec`, `release`
 > - notes: Consumers propose changes through the declared contacts; the library owner changes code.

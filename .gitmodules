@@ -1,0 +1,3 @@
+[submodule "deps/acme-lib-utils"]
+	path = deps/acme-lib-utils
+	url = https://github.com/neprel/git-a2a-demo-acme-lib

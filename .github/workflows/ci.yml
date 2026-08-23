@@ -27,10 +27,10 @@ jobs:
           enable-cache: true
       - name: Install git-a2a
         run: go install github.com/neprel/git-a2a/cmd/git-a2a@v1.0.1
-      - name: Check dependency health offline
-        run: git-a2a status --offline
       - name: Check for an upstream update
         run: git-a2a update --check
+      - name: Check dependency health offline
+        run: git-a2a status --offline
       - name: Build and test TypeScript package
         run: npm ci && npm test && npm run build
       - name: Build and test Python package

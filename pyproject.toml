@@ -1,0 +1,13 @@
+[project]
+name = "consumer-app"
+version = "1.0.0"
+requires-python = ">=3.11"
+dependencies = [
+  "acme-lib-utils",
+]
+
+[tool.uv]
+package = false
+
+[tool.uv.sources]
+"acme-lib-utils" = { git = "https://github.com/neprel/git-a2a-demo-acme-lib", rev = "dcaf2b1e6ff07567ccab19d037d5e516e9b4774c" }

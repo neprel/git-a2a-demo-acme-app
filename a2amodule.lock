@@ -1,0 +1,8 @@
+schema: 1
+dependencies:
+    acme-lib-utils:
+        git: https://github.com/neprel/git-a2a-demo-acme-lib
+        ref: main
+        path: .
+        commit: dcaf2b1e6ff07567ccab19d037d5e516e9b4774c
+        manifest: sha256:c6015071fb82e2015857ae94920eabf1f2675b296ca9a51c0d2994bb4ebe4583

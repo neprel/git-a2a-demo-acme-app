@@ -1,0 +1,39 @@
+name: Consumer proof
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  proof:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+      - uses: actions/setup-go@40f1582b2485089dde7abd97c1529aa768e1baff # v5.6.0
+        with:
+          go-version: "1.25"
+          cache: true
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: "24"
+          cache: npm
+      - uses: astral-sh/setup-uv@c771a70e6277c0a99b617c7a806ffedaca235ff9 # v9.0.0
+        with:
+          version: "0.8.15"
+          enable-cache: true
+      - name: Install git-a2a
+        run: go install github.com/neprel/git-a2a/cmd/git-a2a@v1.0.1
+      - name: Check dependency health offline
+        run: git-a2a status --offline
+      - name: Check for an upstream update
+        run: git-a2a update --check
+      - name: Build and test TypeScript package
+        run: npm ci && npm test && npm run build
+      - name: Build and test Python package
+        run: uv sync && uv run --with pytest pytest -q && uv run python app.py
+      - name: Build and test Go package
+        run: go test ./... && go run ./cmd/demo

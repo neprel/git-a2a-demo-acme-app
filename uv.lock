@@ -1,0 +1,19 @@
+version = 1
+revision = 3
+requires-python = ">=3.11"
+
+[[package]]
+name = "acme-lib-utils"
+version = "1.1.0"
+source = { git = "https://github.com/neprel/git-a2a-demo-acme-lib?rev=dcaf2b1e6ff07567ccab19d037d5e516e9b4774c#dcaf2b1e6ff07567ccab19d037d5e516e9b4774c" }
+
+[[package]]
+name = "consumer-app"
+version = "1.0.0"
+source = { virtual = "." }
+dependencies = [
+    { name = "acme-lib-utils" },
+]
+
+[package.metadata]
+requires-dist = [{ name = "acme-lib-utils", git = "https://github.com/neprel/git-a2a-demo-acme-lib?rev=dcaf2b1e6ff07567ccab19d037d5e516e9b4774c" }]

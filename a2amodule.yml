@@ -1,0 +1,17 @@
+schema: 1
+module:
+  id: consumer-app
+  description: Polyglot consumer of the Acme utility demo module.
+  exports:
+    - ecosystem: npm
+      name: consumer-app
+    - ecosystem: pypi
+      name: consumer-app
+    - ecosystem: golang
+      name: github.com/neprel/git-a2a-demo-acme-app
+dependencies:
+  - id: acme-lib-utils
+    git: https://github.com/neprel/git-a2a-demo-acme-lib
+    ref: main
+    path: .
+    track: locked

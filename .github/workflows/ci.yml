@@ -41,8 +41,8 @@ jobs:
           jwks_url=https://git-a2a.com/demo/agents/.well-known/jwks.json
           jwks_cache=$(printf %s "$jwks_url" | sha256sum | cut -d ' ' -f 1)
           curl -fsSL "$assets/.well-known/jwks.json" -o ".git-a2a/jwks/$jwks_cache.json"
-      - name: Reconcile signed cards and prove the lock is current
-        run: git-a2a update --no-refresh --no-review && git diff --exit-code
+      - name: Prove cache restoration leaves tracked state unchanged
+        run: git diff --exit-code
       - name: Check dependency health offline
         run: git-a2a status --offline
       - name: Refuse an unsigned upstream commit

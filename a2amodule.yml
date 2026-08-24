@@ -39,3 +39,6 @@ dependencies:
     track: locked
     vendor:
       mode: submodule
+    require:
+      commits: signed
+      signers: trust/allowed_signers

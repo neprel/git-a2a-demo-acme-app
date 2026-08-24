@@ -11,9 +11,11 @@ small app calls the same utility contract.
 2. Compare the local paths in `package.json`, `pyproject.toml`, `go.mod`, and
    `deps/git-a2a.cmake`; they all resolve through `deps/acme-lib-utils` at that commit.
 3. Read the generated dependency roster in `AGENTS.md`.
-4. Inspect `.github/workflows/ci.yml`, which clones submodules recursively, checks health and
+4. Inspect `require` and `trust/allowed_signers`: the lock records a verified signed commit and
+   the two pinned card keys. CI also proves that an unsigned throwaway commit is refused.
+5. Inspect `.github/workflows/ci.yml`, which clones submodules recursively, checks health and
    updates, then builds all four implementations.
-5. Run the lifecycle below from this repository.
+6. Run the lifecycle below from this repository.
 
 ```sh
 git-a2a who acme-lib-utils --intent change
@@ -44,6 +46,7 @@ the app's own route, and inspect the “This module” section generated in `AGE
 git clone --recurse-submodules https://github.com/neprel/git-a2a-demo-acme-app
 cd git-a2a-demo-acme-app
 git-a2a fetch
+git-a2a update --no-refresh --no-review
 git-a2a status --offline
 git-a2a update --check
 npm ci && npm test

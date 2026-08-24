@@ -28,11 +28,28 @@ jobs:
           version: "0.8.15"
           enable-cache: true
       - name: Install git-a2a
-        run: go install github.com/neprel/git-a2a/cmd/git-a2a@latest
+        run: go install github.com/neprel/git-a2a/cmd/git-a2a@main
       - name: Restore the ephemeral manifest cache
         run: git-a2a fetch
+      - name: Reconcile signed cards and prove the lock is current
+        run: git-a2a update --no-refresh --no-review && git diff --exit-code
       - name: Check dependency health offline
         run: git-a2a status --offline
+      - name: Refuse an unsigned upstream commit
+        shell: bash
+        run: |
+          fixture=$(mktemp -d)
+          git clone https://github.com/neprel/git-a2a-demo-acme-lib "$fixture/acme-lib"
+          git -C "$fixture/acme-lib" config user.name "Acme unsigned fixture"
+          git -C "$fixture/acme-lib" config user.email "unsigned@example.invalid"
+          printf '\nunsigned fixture\n' >> "$fixture/acme-lib/README.md"
+          git -C "$fixture/acme-lib" add README.md
+          git -C "$fixture/acme-lib" commit --no-gpg-sign -m "test: unsigned fixture"
+          if git-a2a set acme-lib-utils --git "file://$fixture/acme-lib" --ref HEAD --no-refresh; then
+            echo "unsigned commit was accepted" >&2
+            exit 1
+          fi
+          git diff --exit-code
       - name: Check for an upstream update
         continue-on-error: true
         run: git-a2a update --check

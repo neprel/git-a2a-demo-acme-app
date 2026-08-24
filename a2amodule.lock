@@ -4,11 +4,23 @@ dependencies:
         git: https://github.com/neprel/git-a2a-demo-acme-lib
         ref: main
         path: .
-        commit: 08e947cd41e78733c848e714f6df92fc09773d22
-        manifest: sha256:48e7aad8f2e537ac648b9475ed70f4d6fffe71c8a233f8edde7352deca961a0f
+        commit: 6705ae4d13a40ec34845036d285d11ee2ea7bbf2
+        manifest: sha256:8daa4daed53e05257868cdbc3ca85aafc44fb6957a0c1f45f79645f7291f5d11
         cards:
-            acme-lib-utils: sha256:e154f3cec8004ffc7dbdf4d433450cbc47ad31db19c8a7fc96df1b94216c5f6f
-            acme-pm: sha256:ebdb49ec440600021efb2b8329fff56ca15f47450533c4d709a98e9d339d9d35
+            acme-lib-utils: sha256:7c90696f17d5e08a50f6cedcbcf975668655fbab06990ce4c2106048e6aa7d2e
+            acme-pm: sha256:c67db8f092cebd6bb03380ec2e59bf3d3765be53ba3141b8b98a2baba87f40d0
+        cards-keys:
+            acme-lib-utils:
+                kid: acme-demo-2026
+                thumbprint: HZH11bcIdhdQB0PRnqosaVXtQ-DFiRzXygVSeX1Ybds
+                jwks: https://git-a2a.com/demo/agents/.well-known/jwks.json
+                first-seen: 6705ae4d13a40ec34845036d285d11ee2ea7bbf2
+            acme-pm:
+                kid: acme-demo-2026
+                thumbprint: HZH11bcIdhdQB0PRnqosaVXtQ-DFiRzXygVSeX1Ybds
+                jwks: https://git-a2a.com/demo/agents/.well-known/jwks.json
+                first-seen: 6705ae4d13a40ec34845036d285d11ee2ea7bbf2
+        verified: signed
         vendor:
             mode: submodule
             path: deps/acme-lib-utils

@@ -31,6 +31,16 @@ jobs:
         run: go install github.com/neprel/git-a2a/cmd/git-a2a@main
       - name: Restore the ephemeral manifest cache
         run: git-a2a fetch
+      - name: Seed immutable signed-card fixtures for offline proof
+        shell: bash
+        run: |
+          assets=https://raw.githubusercontent.com/neprel/git-a2a/f181c6b/sites/git-a2a.com/demo/agents
+          mkdir -p .git-a2a/cache/acme-lib-utils/cards .git-a2a/jwks
+          curl -fsSL "$assets/acme-lib-utils/.well-known/agent-card.json" -o .git-a2a/cache/acme-lib-utils/cards/acme-lib-utils.json
+          curl -fsSL "$assets/acme-pm/.well-known/agent-card.json" -o .git-a2a/cache/acme-lib-utils/cards/acme-pm.json
+          jwks_url=https://git-a2a.com/demo/agents/.well-known/jwks.json
+          jwks_cache=$(printf %s "$jwks_url" | sha256sum | cut -d ' ' -f 1)
+          curl -fsSL "$assets/.well-known/jwks.json" -o ".git-a2a/jwks/$jwks_cache.json"
       - name: Reconcile signed cards and prove the lock is current
         run: git-a2a update --no-refresh --no-review && git diff --exit-code
       - name: Check dependency health offline

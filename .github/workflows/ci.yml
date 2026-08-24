@@ -28,7 +28,7 @@ jobs:
           version: "0.8.15"
           enable-cache: true
       - name: Install git-a2a
-        run: go install github.com/neprel/git-a2a/cmd/git-a2a@v1.3.0-rc.2
+        run: go install github.com/neprel/git-a2a/cmd/git-a2a@latest
       - name: Restore the ephemeral manifest cache
         run: git-a2a fetch
       - name: Seed immutable signed-card fixtures for offline proof

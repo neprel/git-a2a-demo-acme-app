@@ -28,11 +28,11 @@ git-a2a_2.0.0_linux_arm64.tar.gz  sha256:5ff7a58f2cbb0986f813fd50200432cf0a86ffc
 ## Full profile, run 1
 
 ```text
-app source: f5946b9c22280692bce405d8e0334defd29989fe
+app source: d994fe7e9014a006a4966150d86864cd7c1ffe68
 lib source: e42437fc28e277af0a0726552e3f7ef8972a6c28
 app agent: {"action":"status","component":"consumer-app","status":"ok"}
 
-added acme-lib-utils at 22d42a6052b0afe44113b7b8e5bb0548c2aa5638
+added acme-lib-utils at 94bc36fd1cc819b50a91f51b37c6735fd43fbf60
 bindings: submodule/git, cmake/cmake, golang/go, npm/npm, pypi/uv
 card: .git-a2a/agents/acme-lib-utils/agent-card.json
 surface: .git-a2a/surfaces/acme-lib-utils
@@ -44,8 +44,8 @@ CMake blank => ''
 
 describe: supportsFallback=false, blankResult=""
 unsupported action: status=unsupported
-owner change: commit=95da3eb9af6f7f31d7ef0de6168a952a6d5b997c, version=1.1.0
-fixture upstream: b64bf17c131cd6ebb24227b57c3e1404eb6445e0 -> e3b4d62870c83bf1869accc0998e951d66227013
+owner change: commit=b0ef1777455ac4eddb8db5aea6564da4eb0d3711, version=1.1.0
+fixture upstream: 57fe211ed1e582bdcf284c848ee58798c6f2fbc1 -> 85b6688254025cc24c3438263bb9ffbe8158a284
 
 npm blank => ''                 # still baseline before Pull
 uv blank => ''
@@ -53,9 +53,9 @@ Go blank => ''
 CMake blank => ''
 
 targeted pull: acme-lib-utils updated; fixture commit and value remained at baseline
-general pull: fixture updated to e3b4d62870c83bf1869accc0998e951d66227013 and fixture-stable-next
+general pull: fixture updated to 85b6688254025cc24c3438263bb9ffbe8158a284 and fixture-stable-next
 
-acme-lib-utils: pulled 95da3eb9af6f7f31d7ef0de6168a952a6d5b997c
+acme-lib-utils: pulled b0ef1777455ac4eddb8db5aea6564da4eb0d3711
 npm blank+fallback => Anonymous
 uv blank+fallback => Anonymous
 Go blank+fallback => Anonymous
@@ -75,13 +75,13 @@ PASS: list remained offline; A2A transport failed while endpoint was stopped
 ```json
 {
   "status": "PASS",
-  "appSource": "f5946b9c22280692bce405d8e0334defd29989fe",
+  "appSource": "d994fe7e9014a006a4966150d86864cd7c1ffe68",
   "libSource": "e42437fc28e277af0a0726552e3f7ef8972a6c28",
-  "appBaseline": "68ae1c6b7e42a41e897ab891ace410ee78a820c2",
-  "libBaseline": "3180f5b4bfd31b893338ef511d300a317a5bbace",
-  "libFinal": "5342e0feeb2db48bd99c6ad31d245c5740853d4d",
-  "stableBaseline": "664fd490a3696fe849394a1f58726362b4acc20d",
-  "stableFinal": "c32c2355a5eba175e59d679583daafe91fa62fcb",
+  "appBaseline": "d1038774e2c3f99591f8e8c5c84d4f55e302614a",
+  "libBaseline": "6746eb451157f4deb804bc22ffde673c6d1e6f20",
+  "libFinal": "7573a09fa73e98c11a589bfef9c196541f028f7a",
+  "stableBaseline": "091cf467f4e8e0cd937aea285b430ad19489dcd1",
+  "stableFinal": "66dd0d3bb23f13789893c7bde390f95d601f93c3",
   "archiveSentinelExcluded": true,
   "usageChecksOffline": true,
   "gitA2A": "2.0.0",
@@ -97,12 +97,12 @@ discovery without reusing the first run's volumes.
 ## Short npm profile
 
 ```text
-app source: f5946b9c22280692bce405d8e0334defd29989fe
+app source: d994fe7e9014a006a4966150d86864cd7c1ffe68
 lib source: e42437fc28e277af0a0726552e3f7ef8972a6c28
-baseline: 9c6b818d6de0e37ba910ea949eb19051e5c2d4b2
-owner final: 4624027cc1ec11228f0b7f08041b0e31644866fb
+baseline: a5ced61471a55dd3d0d35bb23058245faab19448
+owner final: a538b8b95f199cc219f3b2bb371535d6835ffc17
 binding: npm/npm
-acme-lib-utils: pulled 4624027cc1ec11228f0b7f08041b0e31644866fb
+acme-lib-utils: pulled a538b8b95f199cc219f3b2bb371535d6835ffc17
 npm blank+fallback => Anonymous
 PASS: short npm add, discovery, A2A change, pull, and runtime assertion
 A2A request failed: Network communication error: [Errno -2] Name or service not known

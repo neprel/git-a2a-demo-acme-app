@@ -21,7 +21,7 @@ for run in $(seq 1 "$repeat"); do
   echo "== git-a2a demo $profile run $run/$repeat =="
   docker compose down --volumes --remove-orphans >/dev/null 2>&1 || true
   rm -rf "demo/evidence/$evidence_dir"
-  mkdir -p "demo/evidence/$evidence_dir"
+  install -d -m 0777 "demo/evidence/$evidence_dir"
   DEMO_RUN_ID="run-$run" docker compose build
   DEMO_RUN_ID="run-$run" docker compose up -d --wait --wait-timeout 180 git-server lib-agent
   DEMO_RUN_ID="run-$run" docker compose run --rm --no-deps --service-ports --use-aliases \

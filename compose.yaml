@@ -1,0 +1,128 @@
+name: git-a2a-demo
+
+x-runtime: &runtime
+  build:
+    context: .
+    dockerfile: demo/Dockerfile
+  image: git-a2a-demo:2.0.0
+  environment:
+    HOME: /home/demo
+    GOPRIVATE: github.com/neprel/*
+    GONOSUMDB: github.com/neprel/*
+    GOTOOLCHAIN: local
+
+services:
+  setup:
+    <<: *runtime
+    user: "0:0"
+    command: ["/demo/setup.sh"]
+    environment:
+      HOME: /home/demo
+      DEMO_LIB_SHA: ${DEMO_LIB_SHA:-}
+    volumes:
+      - .:/seed/app:ro
+      - ../git-a2a-demo-acme-lib:/seed/lib:ro
+      - ./demo:/demo:ro
+      - app-work:/workspace/app
+      - lib-work:/workspace/lib
+      - git-remotes:/workspace/remotes
+      - tool-cache:/cache
+      - tls-public:/tls/public
+      - tls-private:/tls/private
+
+  git-server:
+    <<: *runtime
+    user: "0:0"
+    command: ["python", "/demo/git_https_server.py"]
+    depends_on:
+      setup:
+        condition: service_completed_successfully
+    networks:
+      default:
+        aliases: [github.com]
+    read_only: true
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "--cacert", "/tls/public/cert.pem", "https://localhost/healthz"]
+      interval: 2s
+      timeout: 2s
+      retries: 30
+    volumes:
+      - git-remotes:/workspace/remotes:ro
+      - tls-public:/tls/public:ro
+      - tls-private:/tls/private:ro
+      - ./demo:/demo:ro
+
+  lib-agent:
+    <<: *runtime
+    command: ["python", "-m", "owner.server"]
+    depends_on:
+      setup:
+        condition: service_completed_successfully
+      git-server:
+        condition: service_healthy
+    working_dir: /workspace/lib
+    environment:
+      HOME: /home/demo
+      ACME_LIB_WORKTREE: /workspace/lib
+      ACME_DEMO_REMOTE: demo
+      ACME_DEMO_REF: refs/heads/demo/fallback
+      UV_CACHE_DIR: /cache/uv
+      GOPRIVATE: github.com/neprel/*
+      GONOSUMDB: github.com/neprel/*
+      GOTOOLCHAIN: local
+      GIT_SSL_CAINFO: /tls/public/cert.pem
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://localhost:8000/.well-known/agent-card.json"]
+      interval: 2s
+      timeout: 2s
+      retries: 30
+    ports:
+      - "127.0.0.1:18080:8000"
+    volumes:
+      - lib-work:/workspace/lib
+      - git-remotes:/workspace/remotes
+      - tool-cache:/cache
+      - tls-public:/tls/public:ro
+
+  app-agent:
+    <<: *runtime
+    command: ["/demo/run-e2e.sh"]
+    depends_on:
+      setup:
+        condition: service_completed_successfully
+      git-server:
+        condition: service_healthy
+      lib-agent:
+        condition: service_healthy
+    working_dir: /workspace/app
+    environment:
+      HOME: /home/demo
+      DEMO_GIT_URL: https://github.com/neprel/git-a2a-demo-acme-lib.git
+      DEMO_BRANCH: demo/fallback
+      EVIDENCE_DIR: /evidence
+      TMPDIR: /workspace/app/.git-a2a/tmp
+      UV_CACHE_DIR: /cache/uv
+      GOMODCACHE: /cache/go/pkg/mod
+      GOPATH: /cache/go
+      GOCACHE: /cache/go/build
+      NPM_CONFIG_CACHE: /cache/npm
+      GOPRIVATE: github.com/neprel/*
+      GONOSUMDB: github.com/neprel/*
+      GOTOOLCHAIN: local
+      GIT_SSL_CAINFO: /tls/public/cert.pem
+    ports:
+      - "127.0.0.1:18081:8001"
+    volumes:
+      - app-work:/workspace/app
+      - ./demo:/demo:ro
+      - ./demo/evidence:/evidence
+      - tool-cache:/cache
+      - tls-public:/tls/public:ro
+
+volumes:
+  app-work:
+  lib-work:
+  git-remotes:
+  tool-cache:
+  tls-public:
+  tls-private:

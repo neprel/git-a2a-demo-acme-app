@@ -7,8 +7,8 @@ import (
 )
 
 func TestUsesGoImplementation(t *testing.T) {
-	got := acmelibutils.FormatLabel("slug", acmelibutils.Slugify("  Acme Demo App  "))
-	if got != "slug: acme-demo-app" {
+	got := acmelibutils.FormatDisplayName("  Ada   Lovelace  ")
+	if got != "Ada Lovelace" {
 		t.Fatalf("got %q", got)
 	}
 }

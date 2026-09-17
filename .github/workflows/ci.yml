@@ -1,4 +1,4 @@
-name: Consumer proof
+name: End-to-end demo
 
 on:
   push:
@@ -9,65 +9,40 @@ permissions:
   contents: read
 
 jobs:
-  proof:
+  demo:
     runs-on: ubuntu-latest
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - profile: npm
+            repeat: '1'
+          - profile: full
+            repeat: '2'
+    defaults:
+      run:
+        working-directory: git-a2a-demo-acme-app
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          submodules: recursive
-      - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+          path: git-a2a-demo-acme-app
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          go-version: "1.25"
-          cache: true
-      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
-        with:
-          node-version: "24"
-          cache: npm
-      - uses: astral-sh/setup-uv@c771a70e6277c0a99b617c7a806ffedaca235ff9 # v9.0.0
-        with:
-          version: "0.8.15"
-          enable-cache: true
-      - name: Install git-a2a
-        run: go install github.com/neprel/git-a2a/cmd/git-a2a@latest
-      - name: Restore the ephemeral manifest cache
-        run: git-a2a fetch
-      - name: Seed immutable signed-card fixtures for offline proof
-        shell: bash
+          repository: neprel/git-a2a-demo-acme-lib
+          ref: e42437fc28e277af0a0726552e3f7ef8972a6c28
+          path: git-a2a-demo-acme-lib
+      - name: Check scripts and Compose model
         run: |
-          assets=https://raw.githubusercontent.com/neprel/git-a2a/f181c6b/sites/git-a2a.com/demo/agents
-          mkdir -p .git-a2a/cache/acme-lib-utils/cards .git-a2a/jwks
-          curl -fsSL "$assets/acme-lib-utils/.well-known/agent-card.json" -o .git-a2a/cache/acme-lib-utils/cards/acme-lib-utils.json
-          curl -fsSL "$assets/acme-pm/.well-known/agent-card.json" -o .git-a2a/cache/acme-lib-utils/cards/acme-pm.json
-          jwks_url=https://git-a2a.com/demo/agents/.well-known/jwks.json
-          jwks_cache=$(printf %s "$jwks_url" | sha256sum | cut -d ' ' -f 1)
-          curl -fsSL "$assets/.well-known/jwks.json" -o ".git-a2a/jwks/$jwks_cache.json"
-      - name: Prove cache restoration leaves tracked state unchanged
+          bash -n demo/*.sh
+          docker compose config -q
+      - name: Run ${{ matrix.profile }} profile with published git-a2a 2.0.0
+        env:
+          DEMO_PROFILE: ${{ matrix.profile }}
+          DEMO_REPEAT: ${{ matrix.repeat }}
+        run: ./demo/run.sh
+      - name: Prove the host checkout was not changed
         run: git diff --exit-code
-      - name: Check dependency health offline
-        run: git-a2a status --offline
-      - name: Refuse an unsigned upstream commit
-        shell: bash
-        run: |
-          fixture=$(mktemp -d)
-          git clone https://github.com/neprel/git-a2a-demo-acme-lib "$fixture/acme-lib"
-          git -C "$fixture/acme-lib" config user.name "Acme unsigned fixture"
-          git -C "$fixture/acme-lib" config user.email "unsigned@example.invalid"
-          printf '\nunsigned fixture\n' >> "$fixture/acme-lib/README.md"
-          git -C "$fixture/acme-lib" add README.md
-          git -C "$fixture/acme-lib" commit --no-gpg-sign -m "test: unsigned fixture"
-          if git-a2a set acme-lib-utils --git "file://$fixture/acme-lib" --ref HEAD --no-refresh; then
-            echo "unsigned commit was accepted" >&2
-            exit 1
-          fi
-          git diff --exit-code
-      - name: Check for an upstream update
-        continue-on-error: true
-        run: git-a2a update --check
-      - name: Build and test TypeScript package
-        run: npm ci && npm test && npm run build
-      - name: Build and test Python package
-        run: uv sync && uv run --with pytest pytest -q && uv run python app.py
-      - name: Build and test Go package
-        run: go test ./... && go run ./cmd/demo
-      - name: Build and test CMake consumer
-        run: cmake -S . -B build && cmake --build build && ./build/cmake/acme_consumer_cpp
+      - name: Remove demo-owned Docker resources
+        if: always()
+        run: ./demo/clean.sh

@@ -3,11 +3,9 @@
   "version": "1.0.0",
   "private": true,
   "type": "module",
+  "packageManager": "npm@11.6.0",
   "scripts": {
     "build": "node app.mjs",
     "test": "node --test app.test.mjs"
-  },
-  "dependencies": {
-    "@acme/lib-utils": "file:deps/acme-lib-utils"
   }
 }

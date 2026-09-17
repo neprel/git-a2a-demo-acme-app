@@ -1,0 +1,26 @@
+{
+  "name": "Acme App Agent",
+  "description": "Deterministic status endpoint for the Acme consumer owner.",
+  "supportedInterfaces": [
+    {
+      "url": "http://app-agent:8001/a2a/jsonrpc",
+      "protocolBinding": "JSONRPC",
+      "protocolVersion": "1.0"
+    }
+  ],
+  "version": "1.0.0",
+  "capabilities": {},
+  "defaultInputModes": ["text/plain"],
+  "defaultOutputModes": ["text/plain"],
+  "skills": [
+    {
+      "id": "status",
+      "name": "Consumer status",
+      "description": "Reports readiness only for the exact JSON request {\"action\":\"status\"}.",
+      "tags": ["status"],
+      "examples": ["{\"action\":\"status\"}"],
+      "inputModes": ["text/plain"],
+      "outputModes": ["text/plain"]
+    }
+  ]
+}

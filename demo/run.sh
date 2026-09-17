@@ -9,6 +9,12 @@ case "$profile" in
   *) echo "DEMO_PROFILE must be full or npm" >&2; exit 2 ;;
 esac
 mkdir -p demo/evidence
+sentinel_dir=demo/evidence/run-source-sentinel
+sentinel=$sentinel_dir/ignored-sentinel
+mkdir -p "$sentinel_dir"
+printf 'harmless ignored source sentinel\n' > "$sentinel"
+git check-ignore -q "$sentinel"
+trap 'rm -f "$sentinel"; rmdir "$sentinel_dir" 2>/dev/null || true' EXIT
 
 for run in $(seq 1 "$repeat"); do
   evidence_dir="$prefix-$run"

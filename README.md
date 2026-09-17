@@ -30,8 +30,9 @@ parent/
 
 The library checkout must be clean and at the commit recorded in
 [`demo/lib-source.sha`](demo/lib-source.sha). The runner also requires this app checkout to be
-clean, records both real source SHAs, and refuses to build a synthetic baseline from uncommitted
-files. To deliberately test two compatible current heads instead of the frozen pilot, use
+clean, records both real source SHAs, and builds each synthetic baseline from `git archive` of
+that exact commit. A harmless ignored sentinel proves that ignored host files cannot leak into
+the workspace or baseline. To deliberately test two compatible current heads instead of the frozen pilot, use
 `DEMO_LIB_SHA=$(git -C ../git-a2a-demo-acme-lib rev-parse HEAD) ./demo/run.sh`; this explicit
 override is not used by CI.
 
@@ -83,10 +84,17 @@ same upstream commit through:
 - a normal Git submodule plus CMake target `acme_lib_utils`.
 
 The automated gate also covers a fresh consumer clone, deleted-materialization repair at the same
-commit, targeted Pull with an independent fixture dependency, idempotent Pull, Remove while
+commit, targeted Pull while a second dependency has a newer upstream revision, idempotent Pull, Remove while
 preserving an unrelated package, manager-failure rollback, an unsafe card path, an absent optional
 surface, offline `list`, an unavailable endpoint, and dirty-submodule preservation. Destructive
 cases use disposable consumers and local bare remotes.
+
+Runtime assertions never invoke a package manager: Python runs from the materialized `.venv`, and
+Go runs with module proxies and VCS downloads disabled. The repair case deletes the installed
+state, proves that the usage check fails without recreating it, runs `git-a2a pull`, and only then
+expects the same check to pass. The targeted case advances both component branches, proves
+`pull acme-lib-utils` leaves the installed fixture at its old commit and behavior, then proves an
+untargeted `pull` updates that fixture.
 
 Read [`demo/run-e2e.sh`](demo/run-e2e.sh) for the main proof and
 [`demo/negative-cases.sh`](demo/negative-cases.sh) for failure cases. The app container has the app

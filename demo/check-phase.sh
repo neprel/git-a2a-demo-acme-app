@@ -6,9 +6,10 @@ cd "${DEMO_APP_ROOT:-/workspace/app}"
 
 case "$phase" in
   baseline)
+    uv_result=$(.venv/bin/python app.py '   ')
+    go_result=$(GOPROXY=off GONOPROXY=none GOPRIVATE= GONOSUMDB=none \
+      GOSUMDB=off GOVCS='*:off' go run -mod=readonly ./cmd/demo '   ')
     npm_result=$(node app.mjs '   ')
-    uv_result=$(uv run --frozen python app.py '   ')
-    go_result=$(go run ./cmd/demo '   ')
     test -z "$npm_result"
     test -z "$uv_result"
     test -z "$go_result"
@@ -20,17 +21,18 @@ case "$phase" in
       "$npm_result" "$uv_result" "$go_result" "$cmake_result"
     ;;
   final)
+    uv_result=$(.venv/bin/python -c \
+      'from acme_lib_utils import format_display_name; got=format_display_name("  ", " Anonymous "); assert got == "Anonymous"; print(got)')
     npm_result=$(node --input-type=module -e \
       'import {formatDisplayName} from "@acme/lib-utils"; const got=formatDisplayName("  ", " Anonymous "); if(got!=="Anonymous") process.exit(1); console.log(got)')
-    uv_result=$(uv run --frozen python -c \
-      'from acme_lib_utils import format_display_name; got=format_display_name("  ", " Anonymous "); assert got == "Anonymous"; print(got)')
     mkdir -p .demo-final-go
     printf '%s\n' \
       'package main' \
       'import ("fmt"; lib "github.com/neprel/git-a2a-demo-acme-lib")' \
       'func main(){ got:=lib.FormatDisplayName("  ", " Anonymous "); if got!="Anonymous" { panic(got) }; fmt.Println(got) }' \
       > .demo-final-go/main.go
-    go_result=$(go run ./.demo-final-go)
+    go_result=$(GOPROXY=off GONOPROXY=none GOPRIVATE= GONOSUMDB=none \
+      GOSUMDB=off GOVCS='*:off' go run -mod=readonly ./.demo-final-go)
     cp cmake/main.cpp .demo-main.cpp
     trap 'mv .demo-main.cpp cmake/main.cpp' EXIT
     printf '%s\n' \

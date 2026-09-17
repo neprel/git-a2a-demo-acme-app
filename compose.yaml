@@ -47,7 +47,7 @@ services:
       timeout: 2s
       retries: 30
     volumes:
-      - git-remotes:/workspace/remotes:ro
+      - git-remotes:/workspace/remotes
       - tls-public:/tls/public:ro
       - tls-private:/tls/private:ro
       - ./demo:/demo:ro

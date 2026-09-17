@@ -1,5 +1,6 @@
-"""Read-only smart-HTTP Git server for the isolated demo network."""
+"""Read-only smart-HTTP Git plus one fixed fixture control for the demo."""
 
+import json
 import os
 import ssl
 import subprocess
@@ -24,7 +25,36 @@ class Handler(BaseHTTPRequestHandler):
         self._git()
 
     def do_POST(self) -> None:  # noqa: N802
+        if self.path == "/__demo__/advance-fixture-stable":
+            self._advance_fixture_stable()
+            return
         self._git()
+
+    def _advance_fixture_stable(self) -> None:
+        repo = ROOT / "neprel" / "fixture-stable.git"
+        try:
+            before = subprocess.check_output(
+                ["git", "--git-dir", str(repo), "rev-parse", "refs/heads/demo"],
+                text=True,
+            ).strip()
+            after = subprocess.check_output(
+                ["git", "--git-dir", str(repo), "rev-parse", "refs/heads/demo-next"],
+                text=True,
+            ).strip()
+            if before != after:
+                subprocess.run(
+                    ["git", "--git-dir", str(repo), "update-ref", "refs/heads/demo", after, before],
+                    check=True,
+                )
+            body = json.dumps({"before": before, "after": after}).encode() + b"\n"
+        except subprocess.CalledProcessError as error:
+            self.send_error(500, str(error))
+            return
+        self.send_response(200)
+        self.send_header("Content-Type", "application/json")
+        self.send_header("Content-Length", str(len(body)))
+        self.end_headers()
+        self.wfile.write(body)
 
     def _git(self) -> None:
         parsed = urlsplit(self.path)

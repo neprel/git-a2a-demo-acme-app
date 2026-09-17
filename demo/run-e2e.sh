@@ -47,6 +47,9 @@ PYTHONPATH=/demo python /demo/test_a2a_client.py -v 2>&1 | tee "$evidence/a2a-cl
 baseline=$(git rev-parse HEAD)
 source_app=$(cat .git-a2a/source-app.sha)
 source_lib=$(cat .git-a2a/source-lib.sha)
+archive_sentinel=$(cat .git-a2a/archive-sentinel-verified)
+test "$archive_sentinel" = demo/evidence/run-source-sentinel/ignored-sentinel
+test ! -e "$archive_sentinel"
 git-a2a add "$source_url" --name acme-lib-utils --ref "$branch"
 git-a2a list acme-lib-utils --json | tee "$evidence/list-baseline.json"
 
@@ -95,6 +98,9 @@ git -C "$target" config user.email fixture@example.invalid
 (cd "$target" && git-a2a add "$source_url" --name acme-lib-utils --ref "$branch")
 (cd "$target" && git-a2a add https://github.com/neprel/fixture-stable.git --name stable --ref demo)
 stable_before=$(cd "$target" && git-a2a list stable --json | python -c 'import json,sys; print(json.load(sys.stdin)[0]["commit"])')
+stable_value_before=$(cd "$target" && node --input-type=module -e \
+  'import {fixtureValue} from "@acme/fixture-stable"; process.stdout.write(fixtureValue)')
+test "$stable_value_before" = fixture-stable
 
 python /demo/a2a_client.py "$card" request-fallback --timeout 300 | tee "$evidence/a2a-change.json"
 final_commit=$(python - "$evidence/a2a-change.json" <<'PY'
@@ -107,6 +113,17 @@ PY
 )
 test "$final_commit" != "$locked_baseline"
 
+curl -fsS --cacert /tls/public/cert.pem -X POST \
+  https://github.com/__demo__/advance-fixture-stable \
+  | tee "$evidence/fixture-stable-change.json"
+stable_upstream=$(python - "$evidence/fixture-stable-change.json" <<'PY'
+import json,sys
+r=json.load(open(sys.argv[1]))
+assert r["before"] != r["after"], r
+print(r["after"])
+PY
+)
+
 # Owner pushed, but installed code remains the baseline until Pull.
 /demo/check-phase.sh baseline | tee "$evidence/before-pull.txt"
 
@@ -114,6 +131,13 @@ test "$final_commit" != "$locked_baseline"
 stable_after=$(cd "$target" && git-a2a list stable --json | python -c 'import json,sys; print(json.load(sys.stdin)[0]["commit"])')
 test "$stable_before" = "$stable_after"
 test "$(cd "$target" && git-a2a list acme-lib-utils --json | python -c 'import json,sys; print(json.load(sys.stdin)[0]["commit"])')" = "$final_commit"
+test "$(cd "$target" && node --input-type=module -e \
+  'import {fixtureValue} from "@acme/fixture-stable"; process.stdout.write(fixtureValue)')" = fixture-stable
+
+(cd "$target" && git-a2a pull)
+test "$(cd "$target" && git-a2a list stable --json | python -c 'import json,sys; print(json.load(sys.stdin)[0]["commit"])')" = "$stable_upstream"
+test "$(cd "$target" && node --input-type=module -e \
+  'import {fixtureValue} from "@acme/fixture-stable"; process.stdout.write(fixtureValue)')" = fixture-stable-next
 
 git-a2a pull acme-lib-utils
 git-a2a list acme-lib-utils --json | tee "$evidence/list-final.json"
@@ -129,7 +153,7 @@ grep -q 'fallback = ' "$surface/API.md"
 
 # The package version stays fixed while the Git commit changes.
 test "$(node -p 'require("./node_modules/@acme/lib-utils/package.json").version')" = 1.1.0
-uv run --frozen python -c 'from importlib.metadata import version; assert version("acme-lib-utils") == "1.1.0"'
+.venv/bin/python -c 'from importlib.metadata import version; assert version("acme-lib-utils") == "1.1.0"'
 
 # Pull repairs deleted materializations at the same commit. The entire Go
 # module and build caches are emptied, not only the VCS checkout cache.
@@ -137,6 +161,22 @@ rm -rf node_modules .venv .demo-build deps/acme-lib-utils
 chmod -R u+w /cache/go
 find /cache/go -mindepth 1 -delete
 test -z "$(find /cache/go -mindepth 1 -print -quit)"
+if /demo/check-phase.sh final > "$evidence/missing-materializations.txt" 2>&1; then
+  echo "usage check unexpectedly repaired missing materializations" >&2
+  exit 1
+fi
+test ! -e .venv
+test ! -e node_modules
+test ! -e deps/acme-lib-utils
+test -z "$(find /cache/go -mindepth 1 -print -quit)"
+if GOPROXY=off GONOPROXY=none GOPRIVATE= GONOSUMDB=none GOSUMDB=off \
+    GOVCS='*:off' go run -mod=readonly ./.demo-final-go \
+    >> "$evidence/missing-materializations.txt" 2>&1; then
+  echo "Go usage unexpectedly succeeded without its materialization" >&2
+  exit 1
+fi
+test -z "$(find /cache/go/pkg/mod/github.com/neprel -maxdepth 1 -type d \
+  -name 'git-a2a-demo-acme-lib@*' -print -quit 2>/dev/null)"
 git-a2a pull acme-lib-utils
 /demo/check-phase.sh final > "$evidence/repair.txt"
 
@@ -167,6 +207,6 @@ test -n "$(find "$fresh_go/pkg/mod" -mindepth 1 -print -quit)"
 /demo/negative-cases.sh "$source_url" "$branch" | tee "$evidence/negative-cases.txt"
 
 cat > "$evidence/summary.json" <<JSON
-{"status":"PASS","appSource":"$source_app","libSource":"$source_lib","appBaseline":"$baseline","libBaseline":"$locked_baseline","libFinal":"$final_commit","gitA2A":"2.0.0","a2aSDK":"1.1.2","protocol":"A2A 1.0 JSON-RPC"}
+{"status":"PASS","appSource":"$source_app","libSource":"$source_lib","appBaseline":"$baseline","libBaseline":"$locked_baseline","libFinal":"$final_commit","stableBaseline":"$stable_before","stableFinal":"$stable_upstream","archiveSentinelExcluded":true,"usageChecksOffline":true,"gitA2A":"2.0.0","a2aSDK":"1.1.2","protocol":"A2A 1.0 JSON-RPC"}
 JSON
 echo "PASS: owner A2A request, commit, Pull, and npm/uv/Go/CMake assertions"

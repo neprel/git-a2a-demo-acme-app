@@ -7,10 +7,9 @@ wipe_volume() {
 }
 
 copy_checkout() {
-  local source=$1 target=$2
-  tar -C "$source" \
-    --exclude=.git --exclude=.venv --exclude=node_modules --exclude=build \
-    --exclude=demo/evidence -cf - . | tar -C "$target" -xf -
+  local source=$1 target=$2 commit=$3
+  git -c "safe.directory=$source" -C "$source" archive --format=tar "$commit" \
+    | tar -C "$target" -xf -
   git -C "$target" init -q -b demo
   git -C "$target" config user.name "git-a2a demo"
   git -C "$target" config user.email "demo@example.invalid"
@@ -52,11 +51,16 @@ openssl req -x509 -newkey rsa:2048 -nodes \
   -subj /CN=github.com -addext subjectAltName=DNS:github.com,DNS:localhost \
   >/dev/null 2>&1
 
-copy_checkout /seed/app /workspace/app
-copy_checkout /seed/lib /workspace/lib
+copy_checkout /seed/app /workspace/app "$app_source_sha"
+copy_checkout /seed/lib /workspace/lib "$lib_source_sha"
+sentinel=demo/evidence/run-source-sentinel/ignored-sentinel
+test -f "/seed/app/$sentinel"
+test ! -e "/workspace/app/$sentinel"
+! git -C /workspace/app ls-tree -r --name-only HEAD | grep -Fx "$sentinel"
 mkdir -p /workspace/app/.git-a2a
 printf '%s\n' "$app_source_sha" > /workspace/app/.git-a2a/source-app.sha
 printf '%s\n' "$lib_source_sha" > /workspace/app/.git-a2a/source-lib.sha
+printf '%s\n' "$sentinel" > /workspace/app/.git-a2a/archive-sentinel-verified
 
 mkdir -p /workspace/remotes/neprel
 git init -q --bare /workspace/remotes/neprel/git-a2a-demo-acme-lib.git
@@ -83,8 +87,19 @@ make_fixture() {
   git -C "$source" init -q -b demo
   git -C "$source" -c user.name=fixture -c user.email=fixture@example.invalid add -A
   git -C "$source" -c user.name=fixture -c user.email=fixture@example.invalid commit -q -m baseline
+  local baseline
+  baseline=$(git -C "$source" rev-parse HEAD)
   git init -q --bare "/workspace/remotes/neprel/${name}.git"
-  git -C "$source" push -q "/workspace/remotes/neprel/${name}.git" demo
+  git -C "$source" push -q "/workspace/remotes/neprel/${name}.git" \
+    "$baseline:refs/heads/demo"
+  if test "$name" = fixture-stable; then
+    printf 'export const fixtureValue = "fixture-stable-next";\n' > "$source/index.js"
+    git -C "$source" -c user.name=fixture -c user.email=fixture@example.invalid add index.js
+    git -C "$source" -c user.name=fixture -c user.email=fixture@example.invalid \
+      commit -q -m next
+    git -C "$source" push -q "/workspace/remotes/neprel/${name}.git" \
+      HEAD:refs/heads/demo-next
+  fi
   git --git-dir="/workspace/remotes/neprel/${name}.git" symbolic-ref HEAD refs/heads/demo
   touch "/workspace/remotes/neprel/${name}.git/git-daemon-export-ok"
   rm -rf "$source"

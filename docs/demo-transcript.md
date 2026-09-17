@@ -28,7 +28,11 @@ git-a2a_2.0.0_linux_arm64.tar.gz  sha256:5ff7a58f2cbb0986f813fd50200432cf0a86ffc
 ## Full profile, run 1
 
 ```text
-added acme-lib-utils at d6487b508c105496123ed1dca102d21ff077e025
+app source: 908109852e6fe048cfe15bb6be9c53cbd5db9cf4
+lib source: e42437fc28e277af0a0726552e3f7ef8972a6c28
+app agent: {"action":"status","component":"consumer-app","status":"ok"}
+
+added acme-lib-utils at 073fd8e8c4cafff7e47cd925fbf509812d0b06f0
 bindings: submodule/git, cmake/cmake, golang/go, npm/npm, pypi/uv
 card: .git-a2a/agents/acme-lib-utils/agent-card.json
 surface: .git-a2a/surfaces/acme-lib-utils
@@ -40,19 +44,21 @@ CMake blank => ''
 
 describe: supportsFallback=false, blankResult=""
 unsupported action: status=unsupported
-owner change: commit=db0e89420b56b755a06284019bb06964f80fb1c7, version=1.1.0
+owner change: commit=a45d347c014ac336051ce8576a5acd491b0f55d8, version=1.1.0
 
 npm blank => ''                 # still baseline before Pull
 uv blank => ''
 Go blank => ''
 CMake blank => ''
 
-acme-lib-utils: pulled db0e89420b56b755a06284019bb06964f80fb1c7
+acme-lib-utils: pulled a45d347c014ac336051ce8576a5acd491b0f55d8
 npm blank+fallback => Anonymous
 uv blank+fallback => Anonymous
 Go blank+fallback => Anonymous
 CMake blank+fallback => Anonymous
 
+PASS: repair emptied the complete Go module/build cache before Pull restored it
+PASS: fresh clone populated a separate initially empty Go cache
 PASS: manager rollback, bad card, absent surface, remove retention, fallback, dirty preservation
 PASS: owner A2A request, commit, Pull, and npm/uv/Go/CMake assertions
 PASS: list remained offline; A2A transport failed while endpoint was stopped
@@ -63,9 +69,11 @@ PASS: list remained offline; A2A transport failed while endpoint was stopped
 ```json
 {
   "status": "PASS",
-  "appBaseline": "cebd0e3847770c3b83e9b4b191b1f657973a17d6",
-  "libBaseline": "e7cd82323b92e3e7774b2cf48752abd22fdd92fe",
-  "libFinal": "3288544b6dfd7e97fb047c2fe01dbd16665526c5",
+  "appSource": "908109852e6fe048cfe15bb6be9c53cbd5db9cf4",
+  "libSource": "e42437fc28e277af0a0726552e3f7ef8972a6c28",
+  "appBaseline": "6f82c96ba204efbd54b55c567d7f475ab977391b",
+  "libBaseline": "c8185b3bd5dc55fa0a74750aab279069ee1a73dd",
+  "libFinal": "e9e3b5c787598647b38cdb2e1cc5b77071d8723c",
   "gitA2A": "2.0.0",
   "a2aSDK": "1.1.2",
   "protocol": "A2A 1.0 JSON-RPC"
@@ -79,10 +87,12 @@ discovery without reusing the first run's volumes.
 ## Short npm profile
 
 ```text
-baseline: 90fc5e2fcde1fbeed16cce9c4abd76f49d1e5a85
-owner final: 7f3cb46d1a16de563f2a1480179f1bde3047a004
+app source: 908109852e6fe048cfe15bb6be9c53cbd5db9cf4
+lib source: e42437fc28e277af0a0726552e3f7ef8972a6c28
+baseline: d3e2ea9cd4f9b5838b77c4245034426ab82aa5b0
+owner final: 3dfef74c3907c8002f85fb3bf925a22e7f034919
 binding: npm/npm
-acme-lib-utils: pulled 7f3cb46d1a16de563f2a1480179f1bde3047a004
+acme-lib-utils: pulled 3dfef74c3907c8002f85fb3bf925a22e7f034919
 npm blank+fallback => Anonymous
 PASS: short npm add, discovery, A2A change, pull, and runtime assertion
 A2A request failed: Network communication error: [Errno -2] Name or service not known
